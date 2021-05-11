@@ -29,7 +29,7 @@
 //            bpp: The bits per pixel in the src image
 //Returns: None
 __global__
-void computeRow(float* src,float* dest,int pWidth,int height, int radius,int bpp, uint8_t* img){
+void computeRow(float* src,float* dest,int pWidth,int height, int radius,int bpp){
     int i;
     int row = blockIdx.x * blockDim.x + threadIdx.x;
     printf("working on row %d\n",row);
@@ -55,10 +55,6 @@ void computeRow(float* src,float* dest,int pWidth,int height, int radius,int bpp
         dest[row*pWidth+i]=0;
         dest[(row+1)*pWidth-1-i]=0;
     }
-    int j = row * pWidth;
-    int max = (row + 1) * pWidth;
-    //for (; j < max; j++)
-    //	img[j]=(uint8_t)dest[j];
 		        
 }
 
@@ -110,7 +106,7 @@ int main(int argc,char** argv){
     //int i;
     int width,height,bpp,pWidth;
     char* filename;
-    uint8_t *img;
+    uint8_t *img, *gImg;
     float* dest,*mid;
     if (argc!=3)
         return Usage(argv[0]);
@@ -118,8 +114,9 @@ int main(int argc,char** argv){
     sscanf(argv[2],"%d",&radius);
    
     img=stbi_load(filename,&width,&height,&bpp,0);
-
     pWidth=width*bpp;  //actual width in bytes of an image row
+    cudaMalloc(&gImg, sizeof(uint8_t)*pWidth*height);
+    cudaMemcpy(gImg,img,pWidth*height*sizeof(uint8_t),cudaMemcpyHostToDevice);
 
     cudaMallocManaged(&mid,sizeof(float)*pWidth*height);   
     cudaMallocManaged(&dest,sizeof(float)*pWidth*height);   
@@ -132,7 +129,7 @@ int main(int argc,char** argv){
     int numBlocks = (pWidth + 255)/256;	
     int threadsPerBlock = 256;
     printf("before columns computed\n");
-    computeColumn<<<numBlocks, threadsPerBlock>>>(img,mid,pWidth,height,radius,bpp); 
+    computeColumn<<<numBlocks, threadsPerBlock>>>(gImg,mid,pWidth,height,radius,bpp); 
     stbi_image_free(img); //done with image
     /*
     for (i=0;i<height;i++){
@@ -146,7 +143,7 @@ int main(int argc,char** argv){
     printf("before rows computed\n");
     //img = (uint8_t*)malloc(sizeof(uint8_t)*pWidth*height);
     numBlocks = (height + 255)/256;
-    computeRow<<<numBlocks,threadsPerBlock>>>(mid,dest,pWidth,height,radius,bpp,img);
+    computeRow<<<numBlocks,threadsPerBlock>>>(mid,dest,pWidth,height,radius,bpp);
     t2=time(NULL);
     cudaDeviceSynchronize();
     printf("after rows computed\n");
