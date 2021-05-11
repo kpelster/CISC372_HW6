@@ -154,11 +154,11 @@ int main(int argc,char** argv){
 
     //now back to int8 so wez can save it
    	printf("%d\n",pWidth*height); 
-/*
+
     for(int i=0;i<pWidth*height;i++){
         uint8_t temp = dest[i];
         img[i]=(uint8_t)dest[i];
-    }*/
+    }
     cudaFree(dest);   
     stbi_write_png("output.png",width,height,bpp,img,bpp*width);
     cudaFree(img);
