@@ -32,7 +32,6 @@ __global__
 void computeRow(float* src,float* dest,int pWidth,int height, int radius,int bpp){
     int i;
     int row = blockIdx.x * blockDim.x + threadIdx.x;
-    printf("working on row %d\n",row);
     if (row >= height) {
         return;
     }
@@ -101,7 +100,7 @@ int Usage(char* name){
 }
 
 int main(int argc,char** argv){
-    long t1,t2;
+    double t1,t2;
     int radius=0;
     //int i;
     int width,height,bpp,pWidth;
@@ -120,7 +119,6 @@ int main(int argc,char** argv){
 
     cudaMallocManaged(&mid,sizeof(float)*pWidth*height);   
     cudaMallocManaged(&dest,sizeof(float)*pWidth*height);   
-    t1=time(NULL);
     /*
     for (i=0;i<pWidth;i++){
          computeColumn(img,mid,i,pWidth,height,radius,bpp);
@@ -129,6 +127,7 @@ int main(int argc,char** argv){
     int numBlocks = (pWidth + 255)/256;	
     int threadsPerBlock = 256;
     printf("before columns computed\n");
+    t1=clock();
     computeColumn<<<numBlocks, threadsPerBlock>>>(gImg,mid,pWidth,height,radius,bpp); 
     stbi_image_free(img); //done with image
     /*
@@ -144,20 +143,18 @@ int main(int argc,char** argv){
     //img = (uint8_t*)malloc(sizeof(uint8_t)*pWidth*height);
     numBlocks = (height + 255)/256;
     computeRow<<<numBlocks,threadsPerBlock>>>(mid,dest,pWidth,height,radius,bpp);
-    t2=time(NULL);
     cudaDeviceSynchronize();
-    printf("after rows computed\n");
     cudaFree(mid); //done with mid
-
+    t2=clock();
+    printf("after rows computed\n");
     //now back to int8 so wez can save it
    	printf("%d\n",pWidth*height); 
 
     for(int i=0;i<pWidth*height;i++){
-        uint8_t temp = dest[i];
         img[i]=(uint8_t)dest[i];
     }
     cudaFree(dest);   
     stbi_write_png("output.png",width,height,bpp,img,bpp*width);
     cudaFree(img);
-    printf("Blur with radius %d complete in %ld seconds\n",radius,t2-t1);
+    printf("Blur with radius %d complete in %f seconds\n",radius,(t2-t1)/CLOCKS_PER_SEC);
 }
