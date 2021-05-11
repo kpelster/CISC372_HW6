@@ -32,8 +32,9 @@ __global__
 void computeRow(float* src,float* dest,int pWidth,int height, int radius,int bpp, uint8_t* img){
     int i;
     int row = blockIdx.x * blockDim.x + threadIdx.x;
-    if (row >= height)
+    if (row >= height) {
         return;
+    }
     int bradius=radius*bpp;
     //initialize the first bpp elements so that nothing fails
     for (i=0;i<bpp;i++)
@@ -134,8 +135,10 @@ int main(int argc,char** argv){
     for (i=0;i<height;i++){
         computeRow(mid,dest,i,pWidth,radius,bpp);
     }*/
+
     cudaDeviceSynchronize();
     cudaMallocManaged(&img,sizeof(uint8_t)*pWidth*height);
+
     //img = (uint8_t*)malloc(sizeof(uint8_t)*pWidth*height);
     numBlocks = (height + 255)/256;
     computeRow<<<numBlocks,threadsPerBlock>>>(mid,dest,pWidth,height,radius,bpp,img);
@@ -146,10 +149,12 @@ int main(int argc,char** argv){
     //now back to int8 so wez can save it
    	printf("%d\n",pWidth*height); 
 	printf("%d\n",(int)sizeof(dest));
-    for (int i=0;i<pWidth*height;i++){
-	//uint8_t temp = dest[i];
+	uint8_t temp = dest[1000];
+/*
+    for(int i=0;i<pWidth*height;i++){
+        uint8_t temp = dest[i];
         img[i]=(uint8_t)dest[i];
-    }
+    }*/
     cudaFree(dest);   
     stbi_write_png("output.png",width,height,bpp,img,bpp*width);
     cudaFree(img);
