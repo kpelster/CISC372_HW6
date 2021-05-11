@@ -125,6 +125,7 @@ int main(int argc,char** argv){
     for (i=0;i<pWidth;i++){
          computeColumn(img,mid,i,pWidth,height,radius,bpp);
     } */
+
     int numBlocks = (pWidth + 255)/256;	
     int threadsPerBlock = 256;
     computeColumn<<<numBlocks, threadsPerBlock>>>(img,mid,pWidth,height,radius,bpp); 
@@ -134,7 +135,7 @@ int main(int argc,char** argv){
         computeRow(mid,dest,i,pWidth,radius,bpp);
     }*/
     cudaDeviceSynchronize();
-    cudaMallocManaged(&img,sizeof(uint8_t)*pWidth*height);
+    cudaMallocManaged(&test,sizeof(uint8_t)*pWidth*height);
     numBlocks = (height + 255)/256;
     computeRow<<<numBlocks,threadsPerBlock>>>(mid,dest,pWidth,height,radius,bpp,img);
     t2=time(NULL);
