@@ -1,3 +1,9 @@
+//HW6 Part 2: Cuda slow blur
+//Justin Henke
+//Kara Pelster
+//5/11/21
+
+//Original header:
 //Simple optimized box blur
 //by: Greg Silber
 //Date: 5/1/2021
@@ -15,10 +21,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
-//HW6 Part 2: Cuda slow blur
-//Justin Henke
-//Kara Pelster
-//5/11/21
+
 
 //Computes a single row of the destination image by summing radius pixels
 //Parameters: src: Teh src image as width*height*bpp 1d array
