@@ -15,7 +15,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
-//HW6 Part 2: Cuda slow blur
+//HW6 Part 3: Cuda fast blur without managed memory
 //Justin Henke
 //Kara Pelster
 //5/11/21
@@ -102,16 +102,18 @@ int Usage(char* name){
 int main(int argc,char** argv){
     double t1,t2;
     int radius=0;
-    //int i;
     int width,height,bpp,pWidth;
     char* filename;
     uint8_t *img, *gImg;
     float* host_dest, *dest,*mid;
-    if (argc!=3)
+    int threadsPerBlock = 256;
+    if (argc < 4)
         return Usage(argv[0]);
+    sscanf(argv[3],"%d",&threadsPerBlock);
     filename=argv[1];
     sscanf(argv[2],"%d",&radius);
-   
+
+    printf("%d\n",threadsPerBlock); 
     img=stbi_load(filename,&width,&height,&bpp,0);
     pWidth=width*bpp;  //actual width in bytes of an image row
     cudaMalloc(&gImg, sizeof(uint8_t)*pWidth*height);
@@ -120,34 +122,19 @@ int main(int argc,char** argv){
     cudaMalloc(&mid,sizeof(float)*pWidth*height);   
     cudaMalloc(&dest, sizeof(float)*pWidth*height);   
     host_dest = (float*)malloc(sizeof(float)*pWidth*height);
-    /*
-    for (i=0;i<pWidth;i++){
-         computeColumn(img,mid,i,pWidth,height,radius,bpp);
-    } */
 
-    int numBlocks = (pWidth + 255)/256;	
-    int threadsPerBlock = 256;
-    printf("before columns computed\n");
+    int numBlocks = (pWidth - 1 + threadsPerBlock)/threadsPerBlock;	
     t1=clock();
     computeColumn<<<numBlocks, threadsPerBlock>>>(gImg,mid,pWidth,height,radius,bpp); 
     stbi_image_free(img); //done with image
-    /*
-    for (i=0;i<height;i++){
-        computeRow(mid,dest,i,pWidth,radius,bpp);
-    }*/
     cudaDeviceSynchronize();
-    printf("done computing columns\n");
     cudaMallocManaged(&img,sizeof(uint8_t)*pWidth*height);
 
-
-    printf("before rows computed\n");
-    //img = (uint8_t*)malloc(sizeof(uint8_t)*pWidth*height);
-    numBlocks = (height + 255)/256;
+    numBlocks = (height - 1 + threadsPerBlock)/threadsPerBlock;
     computeRow<<<numBlocks,threadsPerBlock>>>(mid,dest,pWidth,height,radius,bpp);
     cudaDeviceSynchronize();
     cudaFree(mid); //done with mid
     t2=clock();
-    printf("after rows computed\n");
     //now back to int8 so wez can save it
    	printf("%d\n",pWidth*height); 
 

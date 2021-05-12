@@ -1,0 +1,33 @@
+Justin Henke and Kara Pelster
+
+Modified program to accept another argument in the form of how many threads per block.
+Sweetspot is around 200-260, too low or too high, you start slowing down.
+
+
+Testing output:
+
+jhenke@cisc372:~/CISC372_HW6$ make;srun ./cudafastblur gauss.jpg 40 275
+make: 'cudafastblur' is up to date.
+Threads per Block: 275
+Blur with radius 40 complete in 0.063637 seconds
+jhenke@cisc372:~/CISC372_HW6$ make;srun ./cudafastblur gauss.jpg 40 210
+make: 'cudafastblur' is up to date.
+Threads per Block: 210
+Blur with radius 40 complete in 0.060999 seconds
+jhenke@cisc372:~/CISC372_HW6$ make;srun ./cudafastblur gauss.jpg 40 220
+make: 'cudafastblur' is up to date.
+Threads per Block: 220
+Blur with radius 40 complete in 0.060331 seconds
+jhenke@cisc372:~/CISC372_HW6$ make;srun ./cudafastblur gauss.jpg 40 200
+make: 'cudafastblur' is up to date.
+Threads per Block: 200
+Blur with radius 40 complete in 0.060054 seconds
+jhenke@cisc372:~/CISC372_HW6$ make;srun ./cudafastblur gauss.jpg 40 190
+make: 'cudafastblur' is up to date.
+Threads per Block: 190
+Blur with radius 40 complete in 0.069191 seconds
+jhenke@cisc372:~/CISC372_HW6$ make;srun ./cudafastblur gauss.jpg 40 240
+make: 'cudafastblur' is up to date.
+Threads per Block: 240
+Blur with radius 40 complete in 0.060245 seconds
+jhenke@cisc372:~/CISC372_HW6$

@@ -102,7 +102,6 @@ int Usage(char* name){
 int main(int argc,char** argv){
     double t1,t2;
     int radius=0;
-    //int i;
     int width,height,bpp,pWidth;
     char* filename;
     uint8_t *img, *gImg;
@@ -119,10 +118,6 @@ int main(int argc,char** argv){
 
     cudaMallocManaged(&mid,sizeof(float)*pWidth*height);   
     cudaMallocManaged(&dest,sizeof(float)*pWidth*height);   
-    /*
-    for (i=0;i<pWidth;i++){
-         computeColumn(img,mid,i,pWidth,height,radius,bpp);
-    } */
 
     int numBlocks = (pWidth + 255)/256;	
     int threadsPerBlock = 256;
@@ -130,10 +125,6 @@ int main(int argc,char** argv){
     t1=clock();
     computeColumn<<<numBlocks, threadsPerBlock>>>(gImg,mid,pWidth,height,radius,bpp); 
     stbi_image_free(img); //done with image
-    /*
-    for (i=0;i<height;i++){
-        computeRow(mid,dest,i,pWidth,radius,bpp);
-    }*/
     cudaDeviceSynchronize();
     printf("done computing columns\n");
     cudaMallocManaged(&img,sizeof(uint8_t)*pWidth*height);
