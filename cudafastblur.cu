@@ -3,6 +3,7 @@
 //Kara Pelster
 //5/11/21
 
+//Original file header below:
 //Simple optimized box blur
 //by: Greg Silber
 //Date: 5/1/2021
