@@ -121,25 +121,20 @@ int main(int argc,char** argv){
 
     int numBlocks = (pWidth + 255)/256;	
     int threadsPerBlock = 256;
-    printf("before columns computed\n");
     t1=clock();
     computeColumn<<<numBlocks, threadsPerBlock>>>(gImg,mid,pWidth,height,radius,bpp); 
     stbi_image_free(img); //done with image
     cudaDeviceSynchronize();
-    printf("done computing columns\n");
     cudaMallocManaged(&img,sizeof(uint8_t)*pWidth*height);
 
 
-    printf("before rows computed\n");
     //img = (uint8_t*)malloc(sizeof(uint8_t)*pWidth*height);
     numBlocks = (height + 255)/256;
     computeRow<<<numBlocks,threadsPerBlock>>>(mid,dest,pWidth,height,radius,bpp);
     cudaDeviceSynchronize();
     cudaFree(mid); //done with mid
     t2=clock();
-    printf("after rows computed\n");
     //now back to int8 so wez can save it
-   	printf("%d\n",pWidth*height); 
 
     for(int i=0;i<pWidth*height;i++){
         img[i]=(uint8_t)dest[i];

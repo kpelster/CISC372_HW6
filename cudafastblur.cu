@@ -107,13 +107,11 @@ int main(int argc,char** argv){
     uint8_t *img, *gImg;
     float* host_dest, *dest,*mid;
     int threadsPerBlock = 256;
-    if (argc < 4)
+    if (argc != 3)
         return Usage(argv[0]);
-    sscanf(argv[3],"%d",&threadsPerBlock);
     filename=argv[1];
     sscanf(argv[2],"%d",&radius);
 
-    printf("%d\n",threadsPerBlock); 
     img=stbi_load(filename,&width,&height,&bpp,0);
     pWidth=width*bpp;  //actual width in bytes of an image row
     cudaMalloc(&gImg, sizeof(uint8_t)*pWidth*height);
@@ -136,7 +134,6 @@ int main(int argc,char** argv){
     cudaFree(mid); //done with mid
     t2=clock();
     //now back to int8 so wez can save it
-   	printf("%d\n",pWidth*height); 
 
     cudaMemcpy(host_dest,dest,pWidth*height*sizeof(float),cudaMemcpyDeviceToHost);
     for(int i=0;i<pWidth*height;i++){
